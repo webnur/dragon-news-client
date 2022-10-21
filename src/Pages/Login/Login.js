@@ -1,29 +1,46 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthProvider/AuthProvider';
 
 
 
 const Login = () => {
+    const [error, setError] = useState('')
     const navigate = useNavigate()
-    const {signIn} = useContext(AuthContext)
+    const { signIn, setLoading } = useContext(AuthContext);
+
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
 
     const handleSignIn = (event) => {
-        event.preventDefault()  
+        event.preventDefault()
         const form = event.target;
         const email = form.email.value;
         const password = form.password.value;
         console.log(email, password)
         signIn(email, password)
-        .then(result => {
-            const user = result.user;
-            console.log(user)
-            form.reset()
-            navigate('/')
-        })
-        .catch(e => console.error(e))
+            .then(result => {
+                const user = result.user;
+                console.log(user)
+                form.reset()
+                setError('')
+                if(user.emailVerified){
+                    navigate(from, {replace: true})
+                }
+                else{
+                    toast.error('your Email is in verified. Please Verify Your Email.')
+                }
+               
+            })
+            .catch(e => {
+                setError(e.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
 
     }
 
@@ -41,6 +58,9 @@ const Login = () => {
             <Button variant="primary" type="submit">
                 Submit
             </Button>
+            <Form.Text className="text-danger">
+                {error && <p>{error}</p>}
+            </Form.Text>
         </Form>
     );
 };
