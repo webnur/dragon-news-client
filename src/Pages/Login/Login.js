@@ -13,7 +13,7 @@ const Login = () => {
     const { signIn, setLoading } = useContext(AuthContext);
 
     const location = useLocation();
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || "";
 
     const handleSignIn = (event) => {
         event.preventDefault()
